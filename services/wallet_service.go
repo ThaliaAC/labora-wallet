@@ -23,9 +23,9 @@ func (s *WalletService) DeleteWallet(id int, log models.Log) error {
 	return s.DbHandler.DeleteWallet(id, log)
 }
 
-func (s *WalletService) WalletStatus(pages, walletsPerPage int) ([]models.Wallet, int, error) {
+func (s *WalletService) WalletStatus(id int) (bool, error) {
 
-	return s.DbHandler.WalletStatus(pages, walletsPerPage)
+	return s.DbHandler.WalletStatus(id)
 }
 
 func (s *WalletService) CreateLog(log models.Log) error {
@@ -33,7 +33,7 @@ func (s *WalletService) CreateLog(log models.Log) error {
 	return s.DbHandler.CreateLog(log)
 }
 
-func (s *WalletService) GetLogs(pages, logsPerPage int) ([]models.Log, int, error) {
+func (s *WalletService) GetLogs(log models.Log) (models.Log, error) {
 
-	return s.DbHandler.GetLogs(pages, logsPerPage)
+	return s.DbHandler.GetLogs(log)
 }
