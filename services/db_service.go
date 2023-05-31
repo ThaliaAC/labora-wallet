@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type PostgresDBHandler struct {
+type PointerToDb struct {
 	*sql.DB
 }
 
@@ -29,18 +29,17 @@ func LoadEnvVar() (string, string, string, string, string) {
 	return host, port, dbName, user, password
 }
 
-func Connect_DB() (*PostgresDBHandler, error) {
+func Connect_DB() (*PointerToDb, error) {
 
 	host, port, dbName, user, password := LoadEnvVar()
 	psqlInfo := fmt.Sprintf("host=%s port=%s dbName=%s user=%s password=%s sslmode=disable", host, port, dbName, user, password)
 	dbConn, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatal(err)
-
-		return nil, err
 	}
+
 	fmt.Println("Succesful connection to database:", dbConn)
-	DbHandler := &PostgresDBHandler{dbConn}
+	DbHandler := &PointerToDb{dbConn}
 	var result int
 	err = dbConn.QueryRow("SELECT 1").Scan(&result)
 	if err != nil {

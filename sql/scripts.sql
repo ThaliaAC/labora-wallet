@@ -1,17 +1,26 @@
-CREATE TABLE public."logTable"
+CREATE TABLE public."logTableWallet"
 (
-    id SERIAL NOT NULL,
-    national_id character varying(20) NOT NULL,
+    id serial NOT NULL,
+    national_id character varying(10) NOT NULL,
+    status character varying(10) NOT NULL,
+    country character varying(10) NOT NULL,
     request_date date NOT NULL,
-    status_id character varying(20) NOT NULL,
+    request_type character varying(10) NOT NULL,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE public."walletTable"
+ALTER TABLE IF EXISTS public."logTableWallet"
+    OWNER to postgres;
+
+CREATE TABLE public."walletTableWallet"
 (
-    id SERIAL NOT NULL,
-    national_id character varying(20) NOT NULL,
-    country character varying(2) NOT NULL,
-    creation_date date NOT NULL,
+    id serial NOT NULL,
+    national_id character varying(10) NOT NULL,
+    country character varying(10) NOT NULL,
+    request_date date NOT NULL,
+    balance numeric(80) NOT NULL,
     PRIMARY KEY (id)
 );
+
+ALTER TABLE IF EXISTS public."walletTableWallet"
+    OWNER to postgres;

@@ -1,18 +1,20 @@
 package controllers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/ThaliaAC/labora-wallet/models"
 	"github.com/ThaliaAC/labora-wallet/services"
 	"github.com/gorilla/mux"
 )
 
-type WalletController struct {
-	WalletService services.WalletService
+type PostgresDBHandler struct {
+	db *sql.DB
 }
 
 func ResponseJson(response http.ResponseWriter, status int, data interface{}) error {
@@ -33,24 +35,62 @@ func ResponseJson(response http.ResponseWriter, status int, data interface{}) er
 	return nil
 }
 
-func (c *WalletController) CreateWallet(response http.ResponseWriter, request *http.Request) {
+func (p *PostgresDBHandler) CreateWallet(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	var newPerson models.Person
 
 	err := json.NewDecoder(request.Body).Decode(&newPerson)
 	if err != nil {
 		response.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(response).Encode(err)
+		if err := json.NewEncoder(response).Encode(err); err != nil {
+			fmt.Println("Error encoding the error: ", err)
+		}
 		return
 	}
-	status, wallet, err := services.CreateRequest(newPerson)
+
+	wallet, err := CreateRequest(newPerson)
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("Error creating wallet: ", err)
+		return
+	}
 	response.WriteHeader(http.StatusCreated)
-	ResponseJson(response, status, wallet)
+	ResponseJson(response, http.StatusOK, wallet)
 	fmt.Println("Wallet successfully created")
 
 }
 
-func (c *WalletController) UpdateWallet(response http.ResponseWriter, request *http.Request) {
+func (p *PostgresDBHandler) CreateRequest(Body_request models.Api_Request_To_Truora) (int, models.Wallet, error) {
+	var wallet models.Wallet
+	var truoraGetResponse models.TruoraGetResponse
+	autorization, err := GetApproval(truoraGetResponse.Check.Score)
+	if err != nil {
+		return http.StatusInternalServerError, models.Wallet{}, fmt.Errorf("API request failed %w", err)
+	}
+	wallet.National_id = Body_request.National_id
+	wallet.Country = Body_request.Country
+	wallet.RequestDate = time.Now()
+	wallet.Balance = 0
+
+	if !autorization {
+		err := p.db.CreateLog(wallet.National_id, wallet.Country, "Denied", "CREATE WALLET")
+		if err != nil {
+			return http.StatusInternalServerError, models.Wallet{}, fmt.Errorf("Error creating the log: %w", err)
+		}
+
+		return http.StatusConflict, models.Wallet{}, nil
+	}
+
+	wallet, err = p.db.CreateWallet(wallet)
+	if err != nil {
+
+		return http.StatusInternalServerError, models.Wallet{}, fmt.Errorf("Error creating the wallet %w", err)
+	}
+
+	return http.StatusOK, wallet, nil
+}
+
+func (p *PostgresDBHandler) UpdateWallet(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 
 	parameters := mux.Vars(request)
@@ -72,7 +112,7 @@ func (c *WalletController) UpdateWallet(response http.ResponseWriter, request *h
 		return
 	}
 
-	wallet, err = c.WalletService.UpdateWallet(id, wallet)
+	wallet, err = services.UpdateWallet(id, wallet)
 	if err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
 
@@ -82,32 +122,28 @@ func (c *WalletController) UpdateWallet(response http.ResponseWriter, request *h
 	ResponseJson(response, http.StatusOK, wallet)
 }
 
-func (c *WalletController) DeleteWallet(response http.ResponseWriter, request *http.Request) {
+func (p *PostgresDBHandler) DeleteWallet(response http.ResponseWriter, request *http.Request) {
 	var log models.Log
 	parameters := mux.Vars(request)
 	id, err := strconv.Atoi(parameters["id"])
 
 	if err != nil {
-		response.WriteHeader(http.StatusBadRequest)
-		response.Write([]byte("ID must be a number"))
-
-		return
+		http.Error(response, "it must be a number", http.StatusBadRequest)
 	}
 
-	err = c.WalletService.DeleteWallet(id, log)
+	err = services.DeleteWallet(id, log)
 	if err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
-
 		return
 	}
 
 	ResponseJson(response, http.StatusOK, models.Wallet{})
 }
 
-func (c *WalletController) WalletStatus(w http.ResponseWriter, r *http.Request) {
+func (p *PostgresDBHandler) WalletStatus(w http.ResponseWriter, r *http.Request) {
 }
 
-func (c *WalletController) CreateLog(w http.ResponseWriter, r *http.Request) {
+func (p *PostgresDBHandler) CreateLog(w http.ResponseWriter, r *http.Request) {
 }
-func (c *WalletController) GetLog(w http.ResponseWriter, r *http.Request) {
+func (p *PostgresDBHandler) GetLog(w http.ResponseWriter, r *http.Request) {
 }

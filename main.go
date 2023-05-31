@@ -12,21 +12,21 @@ import (
 )
 
 func main() {
-	var dbHandler, err = services.Connect_DB()
+	dbHandler, err := services.Connect_DB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	walletService := &services.WalletService{DbHandler: dbHandler}
-	controllers := &controllers.WalletController{WalletService: *walletService}
+	walletService := &services.WalletService{dbHandler: dbHandler}
+	wallerController = &controllers.PostgresDBHandler{db: db}
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/CreateWallet", controllers.CreateWallet).Methods("POST")
-	router.HandleFunc("/UpdateWallet/{id}", controllers.UpdateWallet).Methods("PUT")
-	router.HandleFunc("/DeleteWallet/{id}", controllers.DeleteWallet).Methods("DELETE")
-	router.HandleFunc("/WalletStatus", controllers.WalletStatus).Methods("GET")
-	router.HandleFunc("/CreateLog", controllers.CreateLog).Methods("GET")
-	router.HandleFunc("/GetLog", controllers.GetLog).Methods("GET")
+	router.HandleFunc("/CreateWallet", walletController.CreateWallet).Methods("POST")
+	router.HandleFunc("/UpdateWallet/{id}", walletController.UpdateWallet).Methods("PUT")
+	router.HandleFunc("/DeleteWallet/{id}", walletController.DeleteWallet).Methods("DELETE")
+	router.HandleFunc("/WalletStatus", walletController.WalletStatus).Methods("GET")
+	router.HandleFunc("/CreateLog", walletController.CreateLog).Methods("GET")
+	router.HandleFunc("/GetLog", walletController.GetLog).Methods("GET")
 
 	corsOptions := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4000/"}),
@@ -35,6 +35,7 @@ func main() {
 	handler := corsOptions(router)
 
 	if err := config.StartServer(handler); err != nil {
-		log.Fatalf("Error starting server: %v", err)
+		log.Fatalf("Server startup failed: %v", err)
+		panic(err)
 	}
 }

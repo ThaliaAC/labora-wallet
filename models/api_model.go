@@ -28,5 +28,5 @@ type TruoraGetResponse struct {
 		NameScore    int       `json:"name_score"`
 		IDScore      int       `json:"id_score"`
 		Score        int       `json:"score"`
-	}
+	} `json:"check"`
 }
