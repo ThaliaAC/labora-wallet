@@ -1,6 +1,6 @@
 package models
 
-type DBHandler interface {
+type DbHandler interface {
 	CreateWallet(wallet Wallet, log Log) (Wallet, error)
 	UpdateWallet(id int, wallet Wallet) (Wallet, error)
 	DeleteWallet(id int, log Log) error

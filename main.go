@@ -12,12 +12,14 @@ import (
 )
 
 func main() {
+
+	//Debe estar en Services
 	dbHandler, err := services.Connect_DB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	walletService := &services.WalletService{dbHandler: dbHandler}
-	wallerController = &controllers.PostgresDBHandler{db: db}
+	walletService := &services.WalletService{DbHandler: dbHandler}
+	walletController := &controllers.WalletController{WalletService: *walletService}
 
 	router := mux.NewRouter()
 
@@ -27,7 +29,7 @@ func main() {
 	router.HandleFunc("/WalletStatus", walletController.WalletStatus).Methods("GET")
 	router.HandleFunc("/CreateLog", walletController.CreateLog).Methods("GET")
 	router.HandleFunc("/GetLog", walletController.GetLog).Methods("GET")
-
+	//Crear una pequeña app en React
 	corsOptions := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:4000/"}),
 		handlers.AllowedMethods([]string{"GET", "POST"}),
