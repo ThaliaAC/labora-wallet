@@ -1,4 +1,4 @@
-CREATE TABLE public."logTableWallet"
+CREATE TABLE public."logsTable"
 (
     id serial NOT NULL,
     national_id character varying(10) NOT NULL,
@@ -9,10 +9,10 @@ CREATE TABLE public."logTableWallet"
     PRIMARY KEY (id)
 );
 
-ALTER TABLE IF EXISTS public."logTableWallet"
+ALTER TABLE IF EXISTS public."logsTable"
     OWNER to postgres;
 
-CREATE TABLE public."walletTableWallet"
+CREATE TABLE public."walletsTable"
 (
     id serial NOT NULL,
     national_id character varying(10) NOT NULL,
@@ -22,5 +22,23 @@ CREATE TABLE public."walletTableWallet"
     PRIMARY KEY (id)
 );
 
-ALTER TABLE IF EXISTS public."walletTableWallet"
+ALTER TABLE IF EXISTS public."walletsTable"
+    OWNER to postgres;
+
+    CREATE TABLE public."transactionsTable"
+(
+    id serial NOT NULL,
+    wallet_id integer NOT NULL,
+    transaction_type character varying(50) NOT NULL,
+    amount numeric NOT NULL,
+    transaction_date date NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (wallet_id)
+        REFERENCES public."walletsTable" (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+ALTER TABLE IF EXISTS public."transactionsTable"
     OWNER to postgres;

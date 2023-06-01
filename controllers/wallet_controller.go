@@ -36,7 +36,7 @@ func ResponseJson(response http.ResponseWriter, status int, data interface{}) er
 func (p *WalletController) CreateWallet(response http.ResponseWriter, request *http.Request) {
 	response.Header().Set("Content-Type", "application/json")
 	var newPerson models.Person
-
+	var Body_request models.Api_Request_To_Truora
 	err := json.NewDecoder(request.Body).Decode(&newPerson)
 	if err != nil {
 		response.WriteHeader(http.StatusBadRequest)
@@ -46,7 +46,7 @@ func (p *WalletController) CreateWallet(response http.ResponseWriter, request *h
 		return
 	}
 
-	wallet, err := p.WalletService.CreateRequest(newPerson)
+	wallet, err := p.WalletService.CreateRequest(Body_request)
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		fmt.Println("Error creating wallet: ", err)
@@ -80,7 +80,7 @@ func (p *WalletController) UpdateWallet(response http.ResponseWriter, request *h
 		return
 	}
 
-	wallet, err = services.UpdateWallet(id, wallet)
+	wallet, err = p.WalletService.UpdateWallet(id, wallet)
 	if err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
 
@@ -99,7 +99,7 @@ func (p *WalletController) DeleteWallet(response http.ResponseWriter, request *h
 		http.Error(response, "it must be a number", http.StatusBadRequest)
 	}
 
-	err = services.DeleteWallet(id, log)
+	err = p.WalletService.DeleteWallet(id, log)
 	if err != nil {
 		http.Error(response, err.Error(), http.StatusBadRequest)
 		return
@@ -108,10 +108,26 @@ func (p *WalletController) DeleteWallet(response http.ResponseWriter, request *h
 	ResponseJson(response, http.StatusOK, models.Wallet{})
 }
 
-func (p *WalletController) WalletStatus(w http.ResponseWriter, r *http.Request) {
+func (p *WalletController) WalletStatus(response http.ResponseWriter, request *http.Request) {
+	var log models.Log
+	parameters := mux.Vars(request)
+	id, err := strconv.Atoi(parameters["id"])
+
+	if err != nil {
+		http.Error(response, "it must be a number", http.StatusBadRequest)
+	}
+
+	statusMsg, err := services.WalletStatusFromLog(id, log)
+	if err != nil {
+		http.Error(response, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	ResponseJson(response, http.StatusOK, statusMsg)
 }
 
-func (p *WalletController) CreateLog(w http.ResponseWriter, r *http.Request) {
+func (p *WalletController) CreateLog(response http.ResponseWriter, request *http.Request) {
 }
-func (p *WalletController) GetLog(w http.ResponseWriter, r *http.Request) {
+
+func (p *WalletController) GetLogs(response http.ResponseWriter, request *http.Request) {
 }

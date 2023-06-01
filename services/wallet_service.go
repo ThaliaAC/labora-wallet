@@ -7,9 +7,9 @@ import (
 	"github.com/ThaliaAC/labora-wallet/models"
 )
 
-// Inyección de dependencias
+// Inyección de dependencias en interface DbInterface
 type WalletService struct {
-	DbHandler models.DbHandler
+	DbInterface models.DbInterface
 }
 
 func (s *WalletService) CreateRequest(Body_request models.Api_Request_To_Truora) (models.Wallet, error) {
@@ -32,7 +32,7 @@ func (s *WalletService) CreateRequest(Body_request models.Api_Request_To_Truora)
 
 	if !autorization {
 		log.Status = "REJECTED"
-		err := s.DbHandler.CreateLog(log)
+		err := s.DbInterface.CreateLog(log)
 		if err != nil {
 			return models.Wallet{}, fmt.Errorf("error creating the log: %w", err)
 		}
@@ -40,7 +40,7 @@ func (s *WalletService) CreateRequest(Body_request models.Api_Request_To_Truora)
 	}
 
 	log.Status = "APPROVED"
-	wallet, err = s.DbHandler.CreateWallet(wallet, log)
+	wallet, err = s.DbInterface.CreateWallet(wallet, log)
 	if err != nil {
 
 		return models.Wallet{}, fmt.Errorf("error creating the wallet %w", err)
@@ -51,30 +51,30 @@ func (s *WalletService) CreateRequest(Body_request models.Api_Request_To_Truora)
 
 func (s *WalletService) CreateWallet(wallet models.Wallet, log models.Log) (models.Wallet, error) {
 
-	return s.DbHandler.CreateWallet(wallet, log)
+	return s.DbInterface.CreateWallet(wallet, log)
 }
 
 func (s *WalletService) UpdateWallet(id int, wallet models.Wallet) (models.Wallet, error) {
 
-	return s.DbHandler.UpdateWallet(id, wallet)
+	return s.DbInterface.UpdateWallet(id, wallet)
 }
 
 func (s *WalletService) DeleteWallet(id int, log models.Log) error {
 
-	return s.DbHandler.DeleteWallet(id, log)
+	return s.DbInterface.DeleteWallet(id, log)
 }
 
-func (s *WalletService) WalletStatus(id int) (bool, error) {
+func (s *WalletService) WalletStatus(id int) (string, error) {
 
-	return s.DbHandler.WalletStatus(id)
+	return s.DbInterface.WalletStatus(id)
 }
 
 func (s *WalletService) CreateLog(log models.Log) error {
 
-	return s.DbHandler.CreateLog(log)
+	return s.DbInterface.CreateLog(log)
 }
 
 func (s *WalletService) GetLogs(log models.Log) (models.Log, error) {
 
-	return s.DbHandler.GetLogs(log)
+	return s.DbInterface.GetLogs(log)
 }

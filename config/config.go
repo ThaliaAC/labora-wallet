@@ -15,7 +15,7 @@ func StartServer(router http.Handler) error {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	port := os.Getenv("DB_PORT")
+	port := os.Getenv("SERVER_PORT")
 
 	server := &http.Server{
 		Handler:      router,

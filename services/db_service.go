@@ -32,14 +32,14 @@ func LoadEnvVar() (string, string, string, string, string) {
 func Connect_DB() (*PostgresDBHandler, error) {
 
 	host, port, dbName, user, password := LoadEnvVar()
-	psqlInfo := fmt.Sprintf("host=%s port=%s dbName=%s user=%s password=%s sslmode=disable", host, port, dbName, user, password)
+	psqlInfo := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, dbName, user, password)
 	dbConn, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("Succesful connection to database:", dbConn)
-	DbHandler := &PostgresDBHandler{dbConn}
+	DbConnHandler := &PostgresDBHandler{dbConn}
 	var result int
 	err = dbConn.QueryRow("SELECT 1").Scan(&result)
 	if err != nil {
@@ -47,5 +47,5 @@ func Connect_DB() (*PostgresDBHandler, error) {
 	}
 
 	fmt.Println("The request to the database is active")
-	return DbHandler, err
+	return DbConnHandler, err
 }
